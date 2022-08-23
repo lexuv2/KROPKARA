@@ -1,0 +1,8 @@
+{
+	"contains_albedo": true,
+	"resolution": 512,
+	"src": {
+		"a": "res://textures/textures/ground/src/grass/grass_depth.png",
+		"rgb": "res://textures/textures/ground/src/grass/grass_albedo.png"
+	}
+}
