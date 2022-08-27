@@ -1,1 +1,1 @@
-/home/lexu/Documents/Godot/KROPKARA/target/debug/gem1: /home/lexu/Documents/Godot/KROPKARA/src/main.rs
+C:\Users\grzeg\Documents\GitHub\fluffy-dollop\target\debug\gem1.exe: C:\Users\grzeg\Documents\GitHub\fluffy-dollop\src\main.rs
