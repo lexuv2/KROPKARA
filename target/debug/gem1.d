@@ -1,1 +1,1 @@
-C:\Users\grzeg\Documents\GitHub\fluffy-dollop\target\debug\gem1.exe: C:\Users\grzeg\Documents\GitHub\fluffy-dollop\src\main.rs
+/home/lexu/Documents/GitHub/fluffy-dollop/target/debug/gem1: /home/lexu/Documents/GitHub/fluffy-dollop/src/generators.rs /home/lexu/Documents/GitHub/fluffy-dollop/src/main.rs /home/lexu/Documents/GitHub/fluffy-dollop/src/smoothers.rs
