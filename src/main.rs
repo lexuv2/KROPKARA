@@ -1,11 +1,11 @@
 
-//------------------------------------------------------------&-----
+//-----------------------------------------------------------------
 
 
 const XMAX:u64 = 299;
 const YMAX:u64 = 299;
 const ZMININI:f64 = 2000.0;
-const ZMAX:f64 = 15000.0;
+const ZMAX:f64 = 10000.0;
 
 pub mod smoothers;
 pub mod generators;
@@ -88,19 +88,42 @@ fn main() {
 
                 let ii:i32 = rand::thread_rng().gen_range(0..1000000);
                 let jj:i32 = rand::thread_rng().gen_range(0..1000000);
+
                 for i in 0..(XMAX+1) {
                     for j in 0..(YMAX+1) {
-                        map2[i as usize][j as usize] = perlin_scaling_abs(perlin((i as f64)/(100.0) + (ii as f64), (j as f64)/(100.0) + (jj as f64))) * (ZMAX - ZMININI)/1.0 + ZMININI/1.0;   //general
+                        map2[i as usize][j as usize] = perlin_scaling_abs(perlin((i as f64)/(100.0) + (ii as f64), (j as f64)/(100.0) + (jj as f64))) * (ZMAX - ZMININI) + ZMININI;  //general
                     }
                 }
 
-                let ii:i32 = rand::thread_rng().gen_range(0..1000000);
+
+                let mut o2:f64 = 1.0;
+                for o in (-2)..(10 as i32) {
+                    /*match (o < 0) {
+                        true => o2 = 1.0 / 2_i64.pow((o*-1) as u32) as f64,
+                        false => 
+                    }*/
+                    if o < 0 {
+
+                        o2 = 1.0 / 2_i64.pow((o*-1) as u32) as f64;
+                    }
+                    else {
+                        o2 = 2_i64.pow(o as u32) as f64;
+                    }
+
+                    for i in 0..(XMAX+1) {
+                        for j in 0..(YMAX+1) {
+                            map2[i as usize][j as usize] += perlin_scaling_abs(perlin((i as f64)/(100.0)*o2 + (ii as f64), (j as f64)/(100.0)*o2 + (jj as f64))) * (ZMAX - ZMININI)/o2 + ZMININI/o2;   //general
+                        }
+                    }
+                }
+
+                /*let ii:i32 = rand::thread_rng().gen_range(0..1000000);
                 let jj:i32 = rand::thread_rng().gen_range(0..1000000);
                 for i in 0..(XMAX+1) {
                     for j in 0..(YMAX+1) {
                         map2[i as usize][j as usize] += perlin_scaling_abs(perlin((i as f64)/(10.0) + (ii as f64), (j as f64)/(10.0) + (jj as f64))) * (ZMAX - ZMININI)/50.0 + ZMININI/50.0;  //local
                     }
-                }
+                }*/
 
                 
 
@@ -583,14 +606,95 @@ fn main() {
                 let elapsed_time = now.elapsed().as_secs_f64();
                 println!("took {:.4} for an average of {:.4} ms", elapsed_time, elapsed_time/(rainfall as f64)*1000.0);
 
-                for i in 0..(XMAX+1) {
+                /*for i in 0..(XMAX+1) {
                     for j in 0..(YMAX+1) {
                         sm[i as usize][j as usize] /= hmap[i as usize][j as usize];
                         if sm[i as usize][j as usize] == f64::NAN {
                             sm[i as usize][j as usize] = 0.0;  //dis shouwd fix godot bweaking itsewf ovew nyan
                         }
                     }
+                }*/
+
+                let submap3 = sub_heatmap(&map3, &hmap);
+
+                for i in 0..(XMAX+1) {
+                    for j in 0..(YMAX+1) {
+                        hmap[i as usize][j as usize] = hmap[i as usize][j as usize].sqrt();
+                    }
                 }
+                
+                pushdown(&mut map3);
+
+                
+                savemap(&submap3, &subheatmapname);
+                savemap(&map3, &map3name);
+                savemap(&hmap, &hmapname);
+                savemap(&ts, &leftmapname);
+                savemap(&sm, &speedmapname);
+                println!("{:.0}", avmap(&mut map3));
+                println!("{:.0} lost over map ({:.2})", lost_over_map, lost_over_map / (rainfall as f64));
+            },
+            "d4" | "D4" => {  //drop4 (iter perp)
+                let mut hmap = vec![ vec![0.0; (YMAX+1) as usize] ; (XMAX+1) as usize];
+                let mut ts = vec![ vec![0.0 as f64; (YMAX+1) as usize] ; (XMAX+1) as usize];
+                let mut sm = vec![ vec![0.0 as f64; (YMAX+1) as usize] ; (XMAX+1) as usize];
+
+                println!("inport rainfall");
+                let mut rainfall = String::new();
+                io::stdin().read_line(&mut rainfall).expect("rainfall input failed");
+                let rainfall:i64 = rainfall.trim().parse().expect("rainfall parse failed");
+
+                let rainfall = rainfall * (XMAX as i64 + 1) * (YMAX as i64 + 1);               //rainfall aka average drops per spot
+                
+                println!("inport ero");
+                let mut ero = String::new();
+                io::stdin().read_line(&mut ero).expect("ero input failed");
+                let ero:f64 = ero.trim().parse().expect("ero parse failed");
+        
+                println!("inport speed preservation");
+                let mut speed_preservation = String::new();
+                io::stdin().read_line(&mut speed_preservation).expect("speed preservation input failed");
+                let speed_preservation:f64 = speed_preservation.trim().parse().expect("speed preservation parse failed");
+        
+                println!("inport front bias (frontside is 3.0)");
+                let mut frontbias = String::new();
+                io::stdin().read_line(&mut frontbias).expect("front bias input failed");
+                let frontbias:f64 = frontbias.trim().parse().expect("front bias parse failed");
+
+                println!("inport self bias");
+                let mut selfbias = String::new();
+                io::stdin().read_line(&mut selfbias).expect("self bias input failed");
+                let selfbias:f64 = selfbias.trim().parse().expect("self bias parse failed");
+
+                println!("inport range (0 for no smoothing)");
+                let mut range = String::new();
+                io::stdin().read_line(&mut range).expect("range input failed");
+                let range:i64 = range.trim().parse().expect("range parse failed");
+
+                
+
+                let mut map3 = map2.clone();
+
+                let mut lost_over_map:f64 = 0.0;
+
+
+                let now = time::Instant::now();
+
+
+                drop4_iter_perp(rainfall, frontbias, &mut map3, &mut hmap, speed_preservation, ero, &mut ts, &mut sm, range, selfbias, &mut lost_over_map);
+
+
+                let elapsed_time = now.elapsed().as_secs_f64();
+                println!("took {:.4} for an average of {:.4} ms", elapsed_time, elapsed_time/(rainfall as f64)*1000.0);
+
+                /*for i in 0..(XMAX+1) {
+                    for j in 0..(YMAX+1) {
+                        sm[i as usize][j as usize] /= hmap[i as usize][j as usize];
+                        if sm[i as usize][j as usize] == f64::NAN {
+                            sm[i as usize][j as usize] = 0.0;  //dis shouwd fix godot bweaking itsewf ovew nyan
+                        }
+                    }
+                }*/
 
                 let submap3 = sub_heatmap(&map3, &hmap);
 
@@ -866,8 +970,6 @@ fn ini_map (map: &mut Vec<Vec<f64>>){
 
 
 
-
-
 fn get_map_val(x:i64 , y:i64,map: &Vec<Vec<f64>>) -> f64{
 //    let mut ret=0;
     let mid:Vec<f64>;
@@ -886,233 +988,13 @@ fn check_coords(x:i64 , y:i64) -> bool{
     return x >= 0 && (x as u64) <= XMAX && y >= 0 && (y as u64) <= YMAX
 }
 
-/*
-fn drop2(map: &mut Vec<Vec<f64>> , x:i64 , y:i64,speed:f64,dir:i64,material:f64,lx:&i64,ly:&i64 ,dropmap: &mut Vec<Vec<f64>> , speed_damping:&f64, erosion:&f64,life:u64,odw: &mut Vec<Vec<i64>>,sec:&i64,stored:f64, ts:&mut Vec<Vec<f64>>, speedmap:&mut Vec<Vec<f64>>) {
-    
-    if x < 0 || x>XMAX as i64|| y < 0 || y>YMAX as i64{                                             //over the border
-        return ;
-    }
-    let mut st2 = stored;
-    
-    dropmap[x as usize][y as usize]+=1.0;
-    speedmap[x as usize][y as usize]+=speed;
-
-    if odw[x as usize][y as usize] == *sec {                                                        //loop
-        map[x as usize][y as usize]+=st2+1.0;  //content + self
-        ts[x as usize][y as usize]+=st2+1.0;
-        if st2 > 4000.0 {
-            println!("drop {} on {},{} (loop)", st2, x, y);
-        }
-        return ;
-    }
-    odw[x as usize][y as usize]=*sec;
-
-    if speed < 0.0 {                                                                                //negative speed check
-        println!("speed negative in {},{} after {}", x,y,life);
-    }
-    
-    // println!("x:{} y:{} life:{}", x, y, life);
-    let front = 4.0;
-    let frontside = 3.0;
-    let backside = 1.0;
-    let side = 2.0;
-    let back = 0.000001;
-
-    let mut pot = vec![-0.0;8 as usize];
-
-//    012
-//    7 3
-//    654
-    let q = get_map_val(x, y, map);                                                                  //slope
-    pot[0] = q - get_map_val(x-1, y-1, map);
-    pot[1] = q - get_map_val(x  , y-1, map);
-    pot[2] = q - get_map_val(x+1, y-1, map);
-    pot[3] = q - get_map_val(x+1, y  , map);
-    pot[4] = q - get_map_val(x+1, y+1, map);
-    pot[5] = q - get_map_val(x  , y+1, map);
-    pot[6] = q - get_map_val(x-1, y+1, map);
-    pot[7] = q - get_map_val(x+1, y  , map);
-    
-    let ffsbb = [front, frontside, side, backside, back, backside, side, frontside];
-    //           0      1          2     3         4     5         6     7
-
-    if dir != 8 {
-        for i in (0 as i64)..(8 as i64) {
-            pot[i as usize] *= ffsbb[((i-dir+64)%8) as usize];
-        }
-    }
-
-//    println!("slope * dir: {:?}", pot);
-    
-    let mut mini = -99999.0;
-    let mut minid: i64 = -1;
-    for i in 0..8 {                     //highest potential choise
-        if mini<pot[i]{
-            mini=pot[i];
-            minid=i as i64;
-        }
-    }
-
-//    println!(" decided to go {}  with mini = {}", minid, mini);
-
-    let speed_modifier = {              //modifies speed based on change in direction
-        if dir != 8{
-            ffsbb[((minid-dir+64)%8) as usize]/front
-        }
-        else{
-            1.0
-        }
-    };
-    
-    
-    //for x in pot{print!("{}", x);}
-
-    //if mini >= get_map_val(x, y, map) || minid==-1 || mini <=0.0{
-    if minid == -1 || mini <= 0.000001 {   //nie ma gdzie spaść
-        map[x as usize][y as usize]+=st2;
-        ts[x as usize][y as usize]+=st2;
-        if st2 > 4000.0 {
-            println!("drop {} on {},{} (hole)", st2,x,y);
-        }
-        return; 
-    }
-
-    
-    
-
-
-    if minid!=dir && dir!= 8{
-        match dir {
-            0 => if check_coords(x-1, y-1){
-                map[(x-1) as usize][(y-1) as usize]-=speed*erosion;
-                ts[(x-1) as usize][(y-1) as usize]-=speed*erosion;
-            },
-            1 =>if check_coords(x, y-1){
-                map[(x) as usize][(y-1) as usize]-=speed*erosion;
-                ts[(x) as usize][(y-1) as usize]-=speed*erosion;
-            },
-            2 =>if check_coords(x+1, y-1){
-                map[(x+1) as usize][(y-1) as usize]-=speed*erosion;
-                ts[(x+1) as usize][(y-1) as usize]-=speed*erosion;
-            },
-            3 =>if check_coords(x+1, y){
-                map[(x+1) as usize][(y) as usize]-=speed*erosion;
-                ts[(x+1) as usize][(y) as usize]-=speed*erosion;
-            },
-            4 =>if check_coords(x+1, y+1){
-                map[(x+1) as usize][(y+1) as usize]-=speed*erosion;
-                ts[(x+1) as usize][(y+1) as usize]-=speed*erosion;
-            },
-            5 =>if check_coords(x, y+1){
-                map[(x) as usize][(y+1) as usize]-=speed*erosion;
-                ts[(x) as usize][(y+1) as usize]-=speed*erosion;
-            },
-            6 =>if check_coords(x-1, y+1){
-                map[(x-1) as usize][(y+1) as usize]-=speed*erosion;
-                ts[(x-1) as usize][(y+1) as usize]-=speed*erosion;
-            }, 
-            7 =>if check_coords(x-1, y){
-                map[(x-1) as usize][(y) as usize]-=speed*erosion;
-                ts[(x-1) as usize][(y) as usize]-=speed*erosion;
-            },
-            _ => panic!("dir not in 0..8 in minid!=dir"),
-        }
-        st2 += speed*erosion;
-    }
-    
-
-
-    let mut speed_add = 0.0;                                      let _ = speed_add;// <---- dis is hewe jus two stop an annyoying ewwow UwU >.<
-
-    
-    match minid {
-        0 => speed_add = get_map_val(x, y, map) - get_map_val(x-1, y-1, map),
-        1 => speed_add = get_map_val(x, y, map) - get_map_val(x, y-1, map),
-        2 => speed_add = get_map_val(x, y, map) - get_map_val(x+1, y-1, map),
-        3 => speed_add = get_map_val(x, y, map) - get_map_val(x+1, y, map),
-        4 => speed_add = get_map_val(x, y, map) - get_map_val(x+1, y+1, map),
-        5 => speed_add = get_map_val(x, y, map) - get_map_val(x, y+1, map),
-        6 => speed_add = get_map_val(x, y, map) - get_map_val(x-1, y+1, map),
-        7 => speed_add = get_map_val(x, y, map) - get_map_val(x-1, y, map),
-        _ => panic!("minid not in 0..8 in speed match")
-    }
-    
-    if speed_add < 0.0 {
-        println!("{} {} {}\n{} {} {}\n{} {} {}",
-            get_map_val(x-1, y-1, map),
-            get_map_val(x, y-1, map),
-            get_map_val(x+1, y-1, map),
-            get_map_val(x-1, y, map),
-            get_map_val(x, y, map),
-            get_map_val(x+1, y, map),
-            get_map_val(x-1, y+1, map),
-            get_map_val(x, y+1, map),
-            get_map_val(x+1, y+1, map)
-        );
-        println!("{}", minid);
-    }
-
-    map[x as usize][y as usize]-=((speed*speed_damping)*speed_modifier+speed_add)*erosion;
-    ts[x as usize][y as usize]-=((speed*speed_damping)*speed_modifier+speed_add)*erosion;
-    st2 += ((speed*speed_damping)*speed_modifier+speed_add)*erosion;
-
-
-
-    if (speed_add < 0.0) || (*speed_damping < 0.0) || (speed_modifier < 0.0 ) || (speed_add < 0.0) || (speed*speed_damping < 0.0) {
-        println!("speed, speed damping, speed modifier, speed add, speed*speed_damping\n{} , {} , {} , {} , {}", speed, speed_damping, speed_modifier, speed_add, speed*speed_damping);
-        println!("pots {:?}\n\n", pot);
-    }
-//    println!("{} -> {}   goin {}\n", speed, (speed*speed_damping)*speed_modifier+speed_add, minid);
-    
-    //mem::forget(ffsbb);
-
-
-    if x!=*lx || y!=*ly {                        //not first 
-        map[x as usize][y as usize]+=((st2*0.5)/speed).min(st2);
-        ts[x as usize][y as usize]+=((st2*0.5)/speed).min(st2);
-
-        if ((st2*0.5)/speed) > 4000.0 {
-            println!(" drop {} on {},{} (just because)", ((st2*0.5)/speed).min(st2), x, y);
-        }
-        st2 -= ((st2*0.5)/speed).min(st2);
-    }
-
-
-    match minid {
-        0 => drop2(map, x-1, y-1, (speed*speed_damping)*speed_modifier+speed_add, minid, material, &x, &y,dropmap,&speed_damping,&erosion,life+1,odw,sec,st2,ts,speedmap),
-        1 => drop2(map, x, y-1, (speed*speed_damping)*speed_modifier+speed_add, minid, material, &x, &y,dropmap,&speed_damping,&erosion,life+1,odw,sec,st2,ts,speedmap),
-        2 => drop2(map, x+1, y-1, (speed*speed_damping)*speed_modifier+speed_add, minid, material, &x, &y,dropmap,&speed_damping,&erosion,life+1,odw,sec,st2,ts,speedmap),
-        3 => drop2(map, x+1, y, (speed*speed_damping)*speed_modifier+speed_add, minid, material, &x, &y,dropmap,&speed_damping,&erosion,life+1,odw,sec,st2,ts,speedmap),
-        4 => drop2(map, x+1, y+1, (speed*speed_damping)*speed_modifier+speed_add, minid, material, &x, &y,dropmap,&speed_damping,&erosion,life+1,odw,sec,st2,ts,speedmap),
-        5 => drop2(map, x, y+1, (speed*speed_damping)*speed_modifier+speed_add, minid, material, &x, &y,dropmap,&speed_damping,&erosion,life+1,odw,sec,st2,ts,speedmap),
-        6 => drop2(map, x-1, y+1, (speed*speed_damping)*speed_modifier+speed_add, minid, material, &x, &y,dropmap,&speed_damping,&erosion,life+1,odw,sec,st2,ts,speedmap),
-        7 => drop2(map, x-1, y, (speed*speed_damping)*speed_modifier+speed_add, minid, material, &x, &y,dropmap,&speed_damping,&erosion,life+1,odw,sec,st2,ts,speedmap),
-        _ => panic!("minid not in 0..8"),
-    }
-
-    
-    return ;
-
-
-    
-
-
-}
-*/
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 fn max_capacity (speed:f64) -> f64 {//                                                      dis exists just two make it easiew two change teh fowmuwa
 //    speed
-    speed.sqrt()
+    speed.sqrt() + 1.0
 }
 //---------------------------------------------------------------------------------------------------------------------------------------------------
-
-/*
-fn spring3(map: &mut Vec<Vec<f64>>, x:i64, y:i64, speed:f64, dir:i64, dropmap: &mut Vec<Vec<f64>>, speed_preservation:f64, erosion:f64, life:i64, odw: &mut Vec<Vec<i64>>,moment:i64, stored:f64, ts:&mut Vec<Vec<f64>>, speedmap:&mut Vec<Vec<f64>>, range:i64, selfbias:f64, water_supply:i64) {
-    for i in 0..water_supply {
-        drop3(map, x, y, speed, dir, dropmap,speed_preservation,erosion,life,odw,moment,stored,ts,speedmap,range,selfbias);
-    }
-}*/
 
 
 /*
