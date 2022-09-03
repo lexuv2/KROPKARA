@@ -97,7 +97,7 @@ fn main() {
 
 
                 let mut o2:f64 = 1.0;
-                for o in (-2)..(10 as i32) {
+                for o in (-1)..(10 as i32) {
                     /*match (o < 0) {
                         true => o2 = 1.0 / 2_i64.pow((o*-1) as u32) as f64,
                         false => 
@@ -714,6 +714,87 @@ fn main() {
                 savemap(&sm, &speedmapname);
                 println!("{:.0}", avmap(&mut map3));
                 println!("{:.0} lost over map ({:.2})", lost_over_map, lost_over_map / (rainfall as f64));
+            },
+            "d4i" | "D4i" => {  //drop4 (iter perp infinitum)
+                let mut hmap = vec![ vec![0.0; (YMAX+1) as usize] ; (XMAX+1) as usize];
+                let mut ts = vec![ vec![0.0 as f64; (YMAX+1) as usize] ; (XMAX+1) as usize];
+                let mut sm = vec![ vec![0.0 as f64; (YMAX+1) as usize] ; (XMAX+1) as usize];
+
+                println!("inport infinitum");
+                let mut infinitum = String::new();
+                io::stdin().read_line(&mut infinitum).expect("infinitum input failed");
+                let infinitum:f64 = infinitum.trim().parse().expect("infinitum parse failed");
+                
+                println!("inport ero");
+                let mut ero = String::new();
+                io::stdin().read_line(&mut ero).expect("ero input failed");
+                let ero:f64 = ero.trim().parse().expect("ero parse failed");
+        
+                println!("inport speed preservation");
+                let mut speed_preservation = String::new();
+                io::stdin().read_line(&mut speed_preservation).expect("speed preservation input failed");
+                let speed_preservation:f64 = speed_preservation.trim().parse().expect("speed preservation parse failed");
+        
+                println!("inport front bias (frontside is 1.2)");
+                let mut frontbias = String::new();
+                io::stdin().read_line(&mut frontbias).expect("front bias input failed");
+                let frontbias:f64 = frontbias.trim().parse().expect("front bias parse failed");
+
+                println!("inport self bias");
+                let mut selfbias = String::new();
+                io::stdin().read_line(&mut selfbias).expect("self bias input failed");
+                let selfbias:f64 = selfbias.trim().parse().expect("self bias parse failed");
+
+                println!("inport range (0 for no smoothing)");
+                let mut range = String::new();
+                io::stdin().read_line(&mut range).expect("range input failed");
+                let range:i64 = range.trim().parse().expect("range parse failed");
+
+                
+
+                let mut map3 = map2.clone();
+
+                let mut lost_over_map:f64 = 0.0;
+
+
+                let now = time::Instant::now();
+                let mut drops_fell:f64 = 0.0;
+
+
+                drop4_iter_perp_infinitum(infinitum, frontbias, &mut map3, &mut hmap, speed_preservation, ero, &mut ts, &mut sm, range, selfbias, &mut lost_over_map, &mut drops_fell);
+
+
+                let elapsed_time = now.elapsed().as_secs_f64();
+                println!("took {:.4} for an average of {:.4} ms", elapsed_time, elapsed_time/drops_fell*1000.0);
+                println!("dropped {} drops", drops_fell);
+
+                for i in 0..(XMAX+1) {
+                    for j in 0..(YMAX+1) {
+                        sm[i as usize][j as usize] /= hmap[i as usize][j as usize];
+                        if sm[i as usize][j as usize] == f64::NAN {
+                            sm[i as usize][j as usize] = 0.0;  //dis shouwd fix godot bweaking itsewf ovew nyan
+                        }
+                    }
+                }
+
+                let submap3 = sub_heatmap(&map3, &hmap);
+
+                for i in 0..(XMAX+1) {
+                    for j in 0..(YMAX+1) {
+                        hmap[i as usize][j as usize] = hmap[i as usize][j as usize].sqrt();
+                    }
+                }
+                
+                pushdown(&mut map3);
+
+                
+                savemap(&submap3, &subheatmapname);
+                savemap(&map3, &map3name);
+                savemap(&hmap, &hmapname);
+                savemap(&ts, &leftmapname);
+                savemap(&sm, &speedmapname);
+                println!("{:.0}", avmap(&mut map3));
+                println!("{:.0} lost over map ({:.2})", lost_over_map, lost_over_map / (drops_fell as f64));
             },
             _ => {
                 println!("not recognized {}", mode);

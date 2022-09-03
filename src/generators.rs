@@ -902,3 +902,287 @@ pub fn drop4_iter_perp (rounds:i64, front:f64, map: &mut Vec<Vec<f64>>, dropmap:
     
 }
 
+
+pub fn drop4_iter_perp_infinitum (infinitum:f64, front:f64, map: &mut Vec<Vec<f64>>, dropmap: &mut Vec<Vec<f64>>, speed_preservation:f64, erosion:f64, ts:&mut Vec<Vec<f64>>, speedmap:&mut Vec<Vec<f64>>, range:i64, selfbias:f64, lost_over_map: &mut f64, drops_fel: &mut f64) {
+    
+    //the difference between this and normal drop4_iter_perp is this drops until % drops fall over map
+    //this should lead to the creation of actual rivers
+
+
+    let dropsize:f64 = 1.0;
+
+    let mut maximul = front;
+
+    let frontside = 1.2;
+    let side = 1.1;
+    let backside = 1.0;
+    let back = f64::EPSILON;
+    let ffsbb = [front, frontside, side, backside, back, backside, side, frontside];
+    //           0      1          2     3         4     5         6     7
+    //-------------------------------------------------------------------------------setup static prio stuff
+    if frontside > maximul {maximul = frontside};
+    if side > maximul {maximul = side};
+    if backside > maximul {maximul = backside};
+
+    let dropdebug:bool = false;
+    let godebug:bool = false;
+    let progressbar:bool = true;
+    //-------------------------------------------------------------------------------setup static debug stuff
+
+    if dropdebug | godebug {
+        println!("in drop with infinitum of {} and front of {}", infinitum, front);
+    }
+
+    let mut odw = vec![ vec![0.0 as f64; (YMAX+1) as usize] ; (XMAX+1) as usize];
+
+    let mut drops_over_map:f64 = 0.0;
+    let mut drops_fell = 1.0;
+    while (drops_fell < 1000.0) || (drops_over_map/drops_fell < infinitum){//--------individual drops, the while is the diff between infinitum and _iter_perp
+        
+
+        if progressbar {
+            if (drops_fell as i64) % 1000 == 0 {//-----------------------------------------------------progress
+                if drops_fell == 0.0 {
+                    println!("{:.2} / {:.2} ({:.2}%)", drops_over_map/drops_fell , infinitum, drops_fell);
+                }
+                else{
+                    println!("{}{}{}{:.2} / {:.2} ({:.0})",clear_line(Pos::Both), move_line(-1), clear_line(Pos::Both), drops_over_map/drops_fell , infinitum, drops_fell);
+                }
+            }
+        }
+
+        let mut st:f64 = 0.0;
+        let mut x:i64 = rand::thread_rng().gen_range(0..((XMAX + 1) as i64));
+        let mut y:i64 = rand::thread_rng().gen_range(0..((YMAX + 1) as i64));
+        let mut dir = rand::thread_rng().gen_range(0..7);
+        let mut surr_x = [0 as i64; 8];     let _ = surr_x[7];
+        let mut surr_y = [0 as i64; 8];     let _ = surr_y[7];
+        let mut surr_multiplier = [1.0 as f64; 8];
+        let mut surr_height = [0.0; 9 as usize];
+        let mut surr_speediest:f64;
+        let mut surr_speediest_dir:i64 = rand::thread_rng().gen_range(0..7);
+        let mut highest_prio:f64;
+        let mut highest_prio_dir;  highest_prio_dir = -1;                                             let _ = highest_prio_dir;//<-- this fixes rust warnings
+        let mut local_height:f64;
+        let mut sp2:f64;
+        let mut target_stored:f64;
+        let mut change:f64;
+        //---------------------------------------------------------------------------setup stuff needed for drop fall
+        
+        let mut smooth_stack = vec![(0,0); 0];
+        //---------------------------------------------------------------------------this is used only if range > 0 and only in iter versions of drop
+        
+        if godebug | dropdebug {
+            println!("-----------------------------------------------------------------");
+        }
+
+        let mut speed:f64 = f64::EPSILON;
+        //---------------------------------------------------------------------------this might (should) be adjusted later, for now its a placeholder that works
+        
+
+        'drop_life: loop {//---------------------------------------------------------actuall drop code
+
+
+            local_height = get_map_val(x, y, map);
+
+            if godebug {
+                println!("in {} {} dir = {}", x, y, dir);
+            }
+
+            if check_coords(x, y) == false {
+                *lost_over_map += st;
+                drops_over_map += 1.0;
+                break 'drop_life;
+            }//----------------------------------------------------------------------this handles drop falling over the flat earth
+
+            if dropdebug {
+                println!("have {} out of {}",st, max_capacity(speed));
+            }
+
+            dropmap[x as usize][y as usize] += 1.0;
+            
+
+
+            if odw[x as usize][y as usize] == drops_fell+1.0 {
+                map[x as usize][y as usize] += st + dropsize;
+                ts[x as usize][y as usize] += st + dropsize;
+                if dropdebug {
+                    println!("drop loop {}", st);
+                }
+        
+                if range > 0 {
+                    smootharea(map, range, selfbias, x, y);
+                }
+                break 'drop_life;
+            }
+            else {
+                odw[x as usize][y as usize] = drops_fell+1.0;
+            }//----------------------------------------------------------------------this handles drop falling into a loop
+    //                                                                                                                                  0 1 2
+    //                                                                                                                                  7 8 3
+    //                                                                                                                                  6 5 4
+            surr_x = [x-1, x, x+1, x+1, x+1, x, x-1, x-1];
+            surr_y = [y-1, y-1, y-1, y, y+1, y+1, y+1, y];
+            //-----------------------------------------------------------------------this is just some stuff that makes later code cleaner and maybe marginally faster (less ifs)
+
+            if dir != 8 {
+                for i in (0 as i64)..(8 as i64) {
+                    surr_multiplier[i as usize] = ffsbb[((i-dir+64)%8) as usize];
+                }
+            }
+            else{
+                for i in (0 as i64)..(8 as i64) {
+                    surr_multiplier[i as usize] = 1.0;
+                }  
+            }//----------------------------------------------------------------------this handles direction prio setup
+
+            if godebug {
+                println!("{} {} {} {} {} {} {} {}",surr_multiplier[0],surr_multiplier[1],surr_multiplier[2],surr_multiplier[3],surr_multiplier[4],surr_multiplier[5],surr_multiplier[6],surr_multiplier[7]);
+            }
+
+            surr_speediest = f64::MIN;
+            surr_speediest_dir = 0;
+            let mut qqqq:f64 = 0.0;
+            for i in (0 as i64)..(8 as i64) {
+                if surr_multiplier[i as usize] == f64::EPSILON {
+                    continue;
+                }
+                surr_height[i as usize] = get_map_val(surr_x[i as usize], surr_y[i as usize], map);
+
+                qqqq = speed * speed_preservation * (surr_multiplier[i as usize] / maximul) + local_height - surr_height[i as usize];
+                if godebug {
+                    println!("theoretical speed of {} in the dir of {} aka multiplier of {}",qqqq, i,  surr_multiplier[i as usize] / maximul);
+                }
+
+                if qqqq > surr_speediest {
+                    surr_speediest_dir = i;
+                    surr_speediest = qqqq;
+                }
+
+            }//----------------------------------------------------------------------this decides where to fall (if fall at all)
+
+            if godebug {
+                println!("speediest dir is {} with {}", surr_speediest_dir, surr_speediest);
+            }
+
+            
+
+            highest_prio = f64::MIN;
+            if surr_speediest < 0.0 {
+                let mut surr_lowest:f64 = f64::MAX;
+                let mut surr_lowest_dir:i64 = 0;
+                for i in 0..8 {
+                    surr_lowest = surr_lowest.min(surr_height[i as usize]);
+                    if surr_height[i as usize] == surr_lowest {
+                        surr_lowest_dir = i;
+                    }
+                }
+
+                if surr_lowest - local_height >= st {                                        
+                    map[x as usize][y as usize] += st + dropsize;
+                    ts[x as usize][y as usize] += st + dropsize;
+        
+                    if dropdebug {
+                        println!("drop hole {}", st);
+                    }
+                    
+                    if range > 0 {
+                        smootharea(map, range, selfbias, x, y);
+                    }
+                    break 'drop_life;
+                }//------------------------------------------------------------------this handles drop being in 1x1 hole the drop cant escape
+                else {                                                                       
+                    map[x as usize][y as usize] += surr_lowest - local_height;
+                    ts[x as usize][y as usize] += surr_lowest - local_height;
+                    if dropdebug {
+                        println!("drop outbury {}", surr_lowest - local_height);
+                    }
+                    highest_prio_dir = surr_lowest_dir;
+                    st -= surr_lowest - local_height;
+                }//------------------------------------------------------------------this handles drop being in a 1x1 hole the drop can escape
+            }//----------------------------------------------------------------------this handles drop being in a 1x1 hole
+            else{                                                                               
+                highest_prio_dir = surr_speediest_dir;                                                                           
+            }//----------------------------------------------------------------------this handles drop being able to fall freely
+
+            sp2 = speed * speed_preservation * (surr_multiplier[highest_prio_dir as usize] / maximul) + local_height - surr_height[highest_prio_dir as usize] + f64::EPSILON;
+            speedmap[x as usize][y as usize] += sp2;
+            //-----------------------------------------------------------------------this handles exit speed
+
+            if surr_multiplier[highest_prio_dir as usize] == f64::EPSILON {
+                sp2 = f64::EPSILON;
+            }
+            else if (dir - highest_prio_dir).abs() == 4 {
+                sp2 = f64::EPSILON;
+            }
+            if surr_height[highest_prio_dir as usize] < 0.0001 {
+                sp2 = speed * speed_preservation * (surr_multiplier[highest_prio_dir as usize] / maximul) + f64::EPSILON;
+            }
+            //-----------------------------------------------------------------------this is some deal with the devil stuff that has no reason to work but drop breaks without it so i keep it here
+
+            target_stored = max_capacity(sp2);
+            //-----------------------------------------------------------------------actuall erosion setup
+            
+            if target_stored <= st {
+                map[x as usize][y as usize] += st - target_stored;
+                ts[x as usize][y as usize] += st - target_stored;
+        
+                if dropdebug {
+                    println!("drop slowdown {}", st - target_stored);
+                }
+        
+                st = target_stored;
+            }//----------------------------------------------------------------------this handles dropping some rocks because drop is oversaturated
+            else{
+                
+                change = sp2 * erosion;
+                change = change.min(target_stored - st);
+                change = change.min(local_height - surr_height[highest_prio_dir as usize]);
+                change = change.max(0.0);
+                //-------------------------------------------------------------------this could be 1 line in theory but rust breaks it and just returns 0.0 for some reason and i dont want to debug it
+        
+                map[x as usize][y as usize] -= change;
+                ts[x as usize][y as usize] -= change;
+        
+                st += change;
+        
+                if dropdebug {
+                    println!("pick up {}, st2 is now {}", change, st);
+                }
+            }//----------------------------------------------------------------------this handles picking up some rocks because drop is undersaturated
+
+            
+            if range > 0 {
+                smooth_stack.push((x,y));
+            }//----------------------------------------------------------------------this adds cords to smooth, was implicit before with recursion
+
+
+            if godebug {
+                println!("go {} aka {},{} at a breakneck speed of {}", highest_prio_dir,surr_x[highest_prio_dir as usize], surr_y[highest_prio_dir as usize], sp2);
+            }
+
+            x = surr_x[highest_prio_dir as usize];
+            y = surr_y[highest_prio_dir as usize];
+            dir = highest_prio_dir;
+            speed = sp2;
+            //-----------------------------------------------------------------------this is transition to next location
+
+        }
+
+        if range > 0 {
+            while let Some(top) = smooth_stack.pop() {
+                smootharea2(map, range, selfbias, top.0, top.1);
+            }
+        }//--------------------------------------------------------------------------this handles smoothing, prob irrel
+        drops_fell = drops_fell + 1.0;
+    }
+
+    if progressbar {
+        println!("{}{}{}", clear_line(Pos::Both), move_line(-1), clear_line(Pos::Both));
+    }//------------------------------------------------------------------------------this deletes progress after all drops are dropped
+
+
+    *drops_fel = drops_fell;//-------------------------------------------------------this "returns" how many drops fell
+    
+}
+
