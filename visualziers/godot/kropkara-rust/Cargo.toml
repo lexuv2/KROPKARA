@@ -5,4 +5,13 @@ edition = "2024"
 
 [dependencies]
 godot = "0.2.4"
+<<<<<<< HEAD
 rand = "0.9.0"
+=======
+image = "0.25.6"
+rand = "0.9.0"
+
+
+[lib]
+crate-type = ["cdylib"]
+>>>>>>> d0edd09 (poc)
