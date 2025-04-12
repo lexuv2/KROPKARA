@@ -1,8 +1,13 @@
 use std::path;
 
+use godot::meta::AsArg;
+use godot::meta::ParamType;
 use godot::prelude::*;
 use godot::classes::Control;
 use godot::classes::IControl;
+use godot::classes::Texture2D;
+use godot::classes::*;
+use godot::classes::Image;
 use image_generator::array_to_image;
 use image_generator::get_random_2d_noise;
 use map::Map;
@@ -15,29 +20,62 @@ struct Caller{
     test: f64,
     base: Base<Control>
 
-
 }
 #[godot_api]
 impl IControl for Caller{
     fn init(base: Base<Control>) -> Self
     {
         godot_print!("Hello, world!");
-
         Self{
             test: 10.0,
             base,
         }
-
     }
 }
 #[godot_api]
 impl Caller {
     #[func]
-    fn on_click(){
+    fn on_click(&self){
         let map: Map = Map::new_noise(256, 256, 1.1, 2);
-
-
-        // let noise = get_random_2d_noise(256,256);
         array_to_image(map.height);
+    }
+    #[func]
+    fn perlin(&self, xdmin: i64, ydmin: i64, sp:f64, iters: i64) -> Array<PackedFloat64Array>{
+        let map: Map = Map::new_noise(xdmin, ydmin, sp, iters);
+        return  Caller::get_godot_vec_array_from_map(map);
+    }
+
+
+    #[func]
+    fn generate_image_from_array(arr:Array<PackedFloat64Array>)
+    {
+        let rust_arr = Caller::get_vec_arr_from_godot(arr);
+        array_to_image(rust_arr);
+        
+    }
+
+    fn get_godot_vec_array_from_map(map: Map) -> Array<PackedFloat64Array>
+    {
+        let mut ret: Array<PackedFloat64Array> = Array::new();
+        let heightmap: Vec<Vec<f64>> = map.height;
+
+        for x in heightmap.iter(){
+            let arr = PackedFloat64Array::from(x.clone());
+            ret.push(arr.owned_to_arg());
+        }
+        return  ret;
+    }
+
+
+    fn get_vec_arr_from_godot(arr:  Array<PackedFloat64Array>) -> Vec<Vec<f64>>
+    {
+        let mut ret: Vec<Vec<f64>>= vec![];
+        for x in arr.iter_shared(){
+            let single: Vec<f64> = x.to_vec();
+            ret.push(single);
+        }
+        return ret
+
+        
     }
 }

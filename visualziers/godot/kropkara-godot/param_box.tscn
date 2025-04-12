@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://fkdu0nx1yqk4"]
+
+[ext_resource type="Script" uid="uid://txb42op2e0xt" path="res://param_box.gd" id="1_a8mn8"]
+
+[node name="PanelContainer" type="PanelContainer"]
+script = ExtResource("1_a8mn8")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Param1"
+
+[node name="SpinBox" type="SpinBox" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2

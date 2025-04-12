@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3 uid="uid://dsa81dlydbk3i"]
+
+[ext_resource type="Script" uid="uid://u37bae0ac8yo" path="res://main_window.gd" id="1_0xm2m"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_0xm2m")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="left_panel" type="VBoxContainer" parent="Control/HBoxContainer"]
+layout_mode = 2
+
+[node name="loader" type="ScrollContainer" parent="Control/HBoxContainer/left_panel"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/HBoxContainer/left_panel/loader"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="Control/HBoxContainer/left_panel/loader/VBoxContainer"]
+layout_mode = 2
+text = "LOAD TEST MAP"
+
+[node name="param_box" type="VBoxContainer" parent="Control/HBoxContainer/left_panel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+
+[node name="generate_button" type="Button" parent="Control/HBoxContainer/left_panel/param_box"]
+layout_mode = 2
+text = "GENERATE"
+
+[connection signal="pressed" from="Control/HBoxContainer/left_panel/param_box/generate_button" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="Control/HBoxContainer/left_panel/param_box/generate_button" to="Control" method="_on_button_pressed"]

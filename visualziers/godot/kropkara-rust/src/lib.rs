@@ -10,4 +10,5 @@ struct KropkaraRust;
 unsafe impl ExtensionLibrary for KropkaraRust {}
 
 
-
+// cargo build
+// godot4 main_window.tscn
