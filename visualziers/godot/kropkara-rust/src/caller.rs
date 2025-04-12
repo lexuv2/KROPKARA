@@ -5,7 +5,8 @@ use godot::classes::Control;
 use godot::classes::IControl;
 use image_generator::array_to_image;
 use image_generator::get_random_2d_noise;
-
+use map::Map;
+#[path = "map.rs"] mod map;
 #[path = "image_generator.rs"] mod image_generator;
 
 #[derive(GodotClass)]
@@ -33,7 +34,10 @@ impl IControl for Caller{
 impl Caller {
     #[func]
     fn on_click(){
-        let noise = get_random_2d_noise(256,256);
-        array_to_image(noise);
+        let map: Map = Map::new_noise(256, 256, 1.1, 2);
+
+
+        // let noise = get_random_2d_noise(256,256);
+        array_to_image(map.height);
     }
 }

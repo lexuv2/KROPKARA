@@ -1,8 +1,8 @@
 use rand::prelude::*;
 
 #[derive(Debug)]
-struct Map {
-    height: Vec<Vec<f64>>,
+pub struct Map {
+    pub height: Vec<Vec<f64>>,
     softness: Vec<Vec<f64>>,
     absorption: Vec<Vec<f64>>,
     dropmap: Vec<Vec<f64>>,
@@ -61,7 +61,7 @@ impl Map{
     }
     */
 
-    fn new_noise(x: i64, y: i64, sp: f64, iters: i64) -> Map {
+    pub fn new_noise(x: i64, y: i64, sp: f64, iters: i64) -> Map {
         let mut m = Map::new(x,y,sp);
         let ii:i32 = rand::thread_rng().gen_range(0..255);
         let jj:i32 = rand::thread_rng().gen_range(0..255);
