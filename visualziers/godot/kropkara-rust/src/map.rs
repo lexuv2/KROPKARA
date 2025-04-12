@@ -1,4 +1,4 @@
-
+use rand::prelude::*;
 
 #[derive(Debug)]
 struct Map {
@@ -14,11 +14,11 @@ struct Map {
 
 impl Map{
     fn new(x: i64, y:i64, sp: f64) -> Map {
-        let mut m = vec![vec![0.0]; (x+1) as usize] ; (y+1) as usize];
-        let mut s = vec![vec![0.0]; (x+1) as usize] ; (y+1) as usize];
-        let mut a = vec![vec![0.0]; (x+1) as usize] ; (y+1) as usize];
-        let mut dm = vec![vec![0.0]; (x+1) as usize] ; (y+1) as usize];
-        let mut sm = vec![vec![0.0]; (x+1) as usize] ; (y+1) as usize];
+        let mut m = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
+        let mut s = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
+        let mut a = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
+        let mut dm = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
+        let mut sm = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
         Map {
             height: m,
             softness: s,
@@ -36,7 +36,7 @@ impl Map{
             Some(out) => {
                 match out.get(y as usize) {
                     Some(v) => {
-                        Ok(v)
+                        Ok(v.clone())
                     }
                     None => {Err("OOB")}
                 }
@@ -46,7 +46,7 @@ impl Map{
     }
 
     fn check_oob(&self, x: i64, y: i64) -> bool {
-        (x >= 0) && (x < self.x) && (y >= 0) && (y < self.y)
+        (x >= 0) && (x < self.x_size) && (y >= 0) && (y < self.y_size)
     }
 
     /*
@@ -61,16 +61,16 @@ impl Map{
     }
     */
 
-    fn new_noise(x: i64, y: i64, sp: f64, iters: f64) -> Map {
+    fn new_noise(x: i64, y: i64, sp: f64, iters: i64) -> Map {
         let mut m = Map::new(x,y,sp);
-        let ii:i32 = rand::thread_rnd().gen_range(0..255);
-        let jj:i32 = rand::thread_rnd().gen_range(0..255);
+        let ii:i32 = rand::thread_rng().gen_range(0..255);
+        let jj:i32 = rand::thread_rng().gen_range(0..255);
         let mut disp:f64 = 1.0;
 
-        for iter in (0..iters) {
-            for (xi,vi) in m.height.iter().enumerate() {
-                for (yj,vj) in vi.iter().enumerate() {
-                    vj += perlin(xi as f64 * disp, yj as f64 * disp) / disp;
+        for iter in 0..iters {
+            for (xi,vi) in m.height.iter_mut().enumerate() {
+                for (yj,vj) in vi.iter_mut().enumerate() {
+                    *vj = *vj + perlin(((xi as i64)/x*4) as f64 + (ii as f64) * disp, ((yj as i64)/x*4) as f64 + (jj as f64) * disp) / disp;
                 }
             }
         }
