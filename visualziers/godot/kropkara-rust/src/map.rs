@@ -1,4 +1,5 @@
 use rand::prelude::*;
+use godot::prelude::*;
 
 #[derive(Debug)]
 pub struct Map {
@@ -68,9 +69,13 @@ impl Map{
         let mut disp:f64 = 1.0;
 
         for iter in 0..iters {
+            disp = disp * 2.0;
             for (xi,vi) in m.height.iter_mut().enumerate() {
                 for (yj,vj) in vi.iter_mut().enumerate() {
-                    *vj = *vj + perlin(((xi as i64)/x*4) as f64 + (ii as f64) * disp, ((yj as i64)/x*4) as f64 + (jj as f64) * disp) / disp;
+                    let using_x = (xi as f64)/(x as f64)*4.0 + (ii as f64) * disp;
+                    let using_y = (yj as f64)/(x as f64)*4.0 + (jj as f64) * disp;
+                    let q = 100.0*perlin(using_x, using_y) / disp;
+                    *vj = *vj + q;
                 }
             }
         }
