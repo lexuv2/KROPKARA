@@ -7,3 +7,41 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="left_panel" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+
+[node name="loader" type="ScrollContainer" parent="left_panel"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="left_panel/loader"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="left_panel/loader/VBoxContainer"]
+layout_mode = 2
+text = "LOAD TEST MAP"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="left_panel"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+
+[node name="Button" type="Button" parent="left_panel/VBoxContainer"]
+layout_mode = 2
+text = "GENERATE"
+
+[node name="PanelContainer" type="PanelContainer" parent="left_panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="left_panel/VBoxContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="left_panel/VBoxContainer/PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "Param1"
+
+[node name="SpinBox" type="SpinBox" parent="left_panel/VBoxContainer/PanelContainer/HBoxContainer"]
+layout_mode = 2
