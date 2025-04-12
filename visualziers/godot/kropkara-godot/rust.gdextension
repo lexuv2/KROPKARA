@@ -1,0 +1,14 @@
+[configuration]
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = 4.1
+reloadable = true
+
+[libraries]
+linux.debug.x86_64 =     "res://../kropkara-rust/target/debug/libkropkara-rust.so"
+linux.release.x86_64 =   "res://../kropkara-rust/target/release/libkropkara-rust.so"
+windows.debug.x86_64 =   "res://../kropkara-rust/target/debug/kropkara-rust.dll"
+windows.release.x86_64 = "res://../kropkara-rust/target/release/kropkara-rust.dll"
+macos.debug =            "res://../kropkara-rust/target/debug/libkropkara-rust.dylib"
+macos.release =          "res://../kropkara-rust/target/release/libkropkara-rust.dylib"
+macos.debug.arm64 =      "res://../kropkara-rust/target/debug/libkropkara-rust.dylib"
+macos.release.arm64 =    "res://../kropkara-rust/target/release/libkropkara-rust.dylib"
