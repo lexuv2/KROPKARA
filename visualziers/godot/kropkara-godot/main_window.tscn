@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://c4yyh0hyt7nx2"]
+[gd_scene load_steps=2 format=3 uid="uid://c4yyh0hyt7nx2"]
+
+[ext_resource type="Script" uid="uid://u37bae0ac8yo" path="res://main_window.gd" id="1_n7l54"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -7,6 +9,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_n7l54")
 
 [node name="left_panel" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -45,3 +48,5 @@ text = "Param1"
 
 [node name="SpinBox" type="SpinBox" parent="left_panel/VBoxContainer/PanelContainer/HBoxContainer"]
 layout_mode = 2
+
+[connection signal="pressed" from="left_panel/VBoxContainer/Button" to="." method="_on_button_pressed"]
