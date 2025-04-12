@@ -1,30 +1,33 @@
 extends PanelContainer
+class_name ParamBox
 
-
-@onready var sprinbox: SpinBox = %SpinBox
+@onready var spinbox: SpinBox = %SpinBox
 @onready var label: Label = %Label
 
 
 
 signal value_changed(value: int)
-var _value: float = 0.0
+var value: float = 0.0
 
 
 
-static func create(name: String, value: int, min =0 , max = 100) -> Node:
-    var scene = load("res://param_box.tscn").instantiate()
+static func create(creator: Node,name: String, value: int, min =0 , max = 100) -> PanelContainer:
+    var scene = preload("res://param_box.tscn").instantiate()
+    creator.add_child(scene)
     scene.name = name
-    scene._value = value
-    scene.sprinbox.min_value = min
-    scene.sprinbox.max_value = max
-    scene.sprinbox.value = value
+    scene.value = value
+    scene.spinbox.min_value = min
+    scene.spinbox.max_value = max
+    scene.spinbox.value = value
+    
     scene.label.text = name
     return scene
 
 
-func _on_value_changed(value: int) -> void:
-    _value = value
+func _on_value_changed(value) -> void:
+    self.value = value
+    print_debug(value)
     emit_signal("value_changed", value)
 
 func _ready() -> void:
-    sprinbox.value_changed.connect(_on_value_changed)
+    spinbox.value_changed.connect(_on_value_changed)

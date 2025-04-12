@@ -3,15 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bimsnpgh4ip7p"
-path="res://.godot/imported/TEST.png-804efe6e22854ddaa229a69578983998.ctex"
-metadata={
-"vram_texture": false
-}
+valid=false
 
 [deps]
 
 source_file="res://TEST.png"
-dest_files=["res://.godot/imported/TEST.png-804efe6e22854ddaa229a69578983998.ctex"]
 
 [params]
 
