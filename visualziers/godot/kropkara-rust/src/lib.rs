@@ -1,5 +1,5 @@
 mod caller;
-mod map;
+mod terrain;
 mod image_generator;
 use godot::prelude::*;
 

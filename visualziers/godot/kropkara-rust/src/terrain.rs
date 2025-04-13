@@ -3,37 +3,37 @@ use godot::prelude::*;
 #[path = "perlin.rs"] mod perlin;
 
 #[derive(Debug)]
-pub struct Map {
+pub struct Terrain {
     pub height: Vec<Vec<f64>>,
     softness: Vec<Vec<f64>>,
     absorption: Vec<Vec<f64>>,
-    dropmap: Vec<Vec<f64>>,
-    speedmap: Vec<Vec<f64>>,
+    dropterrain: Vec<Vec<f64>>,
+    speedterrain: Vec<Vec<f64>>,
     speed_preservation: f64,
     x_size: i64,
     y_size: i64,
 }
 
-impl Map{
-    pub fn new(x: i64, y:i64, sp: f64) -> Map {
+impl Terrain{
+    pub fn new(x: i64, y:i64, sp: f64) -> Terrain {
         let mut m = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
         let mut s = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
         let mut a = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
         let mut dm = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
         let mut sm = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
-        Map {
+        Terrain {
             height: m,
             softness: s,
             absorption: a,
-            dropmap: dm,
-            speedmap: sm,
+            dropterrain: dm,
+            speedterrain: sm,
             speed_preservation: sp,
             x_size: x,
             y_size: y
         }
     }
 
-    pub fn normalize(map: &mut Vec<Vec<f64>>, min_val: f64, max_val: f64)
+    pub fn normalize(terrain: &mut Vec<Vec<f64>>, min_val: f64, max_val: f64)
     {
 
     }
@@ -63,17 +63,17 @@ impl Map{
     /*
     // SYF KTORY JESZCZENIE NIE DZIALA
     fn save(&self, filename: &str) {
-        let hmap_name: String = format!("{}_hmap", filename);
-        let smap_name: String = format!("{}_softmap", filename);
-        let amap_name: String = format!("{}_absorptionmap", filename);
-        let dmmap_name: String = format!("{}_dropmap", filename);
-        let smmap_name: String = format!("{}_speedmap", filename);
-        let spmap_name: String = format!("{}_map", filename);
+        let hterrain_name: String = format!("{}_hterrain", filename);
+        let sterrain_name: String = format!("{}_softterrain", filename);
+        let aterrain_name: String = format!("{}_absorptionterrain", filename);
+        let dmterrain_name: String = format!("{}_dropterrain", filename);
+        let smterrain_name: String = format!("{}_speedterrain", filename);
+        let spterrain_name: String = format!("{}_terrain", filename);
     }
     */
 
-    pub fn new_noise(x: i64, y: i64, sp: f64, iters: i64) -> Map {
-        let mut m = Map::new(x,y,sp);
+    pub fn new_noise(x: i64, y: i64, sp: f64, iters: i64) -> Terrain {
+        let mut m = Terrain::new(x,y,sp);
         let ii:i32 = rand::thread_rng().gen_range(0..255);
         let jj:i32 = rand::thread_rng().gen_range(0..255);
         let mut disp:f64 = 1.0;

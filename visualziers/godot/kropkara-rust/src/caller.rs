@@ -9,7 +9,7 @@ use godot::classes::IControl;
 use godot::classes::Texture2D;
 use godot::classes::*;
 use godot::classes::Image;
-use crate::map::*;
+use crate::terrain::*;
 use crate::image_generator::*;
 #[path = "droppers/basic_drop.rs"] mod basic_drop;
 
@@ -35,21 +35,21 @@ impl IControl for Caller{
 impl Caller {
     #[func]
     fn on_click(&self){
-        let map: Map = Map::new_noise(256, 256, 1.1, 2);
-        array_to_image(map.height);
+        let terrain: Terrain = Terrain::new_noise(256, 256, 1.1, 2);
+        array_to_image(terrain.height);
     }
     #[func]
     fn perlin(&self, xdmin: i64, ydmin: i64, sp:f64, iters: i64) -> Array<PackedFloat64Array>{
-        let map: Map = Map::new_noise(xdmin, ydmin, sp, iters);
-        return  Caller::get_godot_vec_array_from_map(map);
+        let terrain: Terrain = Terrain::new_noise(xdmin, ydmin, sp, iters);
+        return  Caller::get_godot_vec_array_from_terrain(terrain);
     }
 
     #[func]
     fn godot_basic_drop(drop_amnt: i64,drop_life: i64,erosion: f64)
     {
-        let mut map: Map = Map::new_noise(512, 512, 1.0, 1);
-        basic_drop(&mut map, drop_amnt, drop_life,erosion);
-        array_to_image(map.height);
+        let mut terrain: Terrain = Terrain::new_noise(512, 512, 1.0, 1);
+        basic_drop(&mut terrain, drop_amnt, drop_life,erosion);
+        array_to_image(terrain.height);
 
 
 
@@ -63,12 +63,12 @@ impl Caller {
         
     }
 
-    fn get_godot_vec_array_from_map(map: Map) -> Array<PackedFloat64Array>
+    fn get_godot_vec_array_from_terrain(terrain: Terrain) -> Array<PackedFloat64Array>
     {
         let mut ret: Array<PackedFloat64Array> = Array::new();
-        let heightmap: Vec<Vec<f64>> = map.height;
+        let heightterrain: Vec<Vec<f64>> = terrain.height;
 
-        for x in heightmap.iter(){
+        for x in heightterrain.iter(){
             let arr = PackedFloat64Array::from(x.clone());
             ret.push(arr.owned_to_arg());
         }

@@ -1,12 +1,12 @@
 use rand::prelude::*;
-use crate::map::*;
+use crate::terrain::*;
 
 
-pub fn basic_drop(map: &mut Map, drop_amnt: i64, drop_life: i64,erosion_factor: f64)
+pub fn basic_drop(terrain: &mut Terrain, drop_amnt: i64, drop_life: i64,erosion_factor: f64)
 {
-    let (h, w) = map.dimensions();
+    let (h, w) = terrain.dimensions();
     
-    let mut ret = map.height.clone();
+    let mut ret = terrain.height.clone();
     
 
     for iter in 0..drop_amnt{
@@ -21,11 +21,11 @@ pub fn basic_drop(map: &mut Map, drop_amnt: i64, drop_life: i64,erosion_factor: 
             let mut tx: i64;
             let mut ty: i64;
 
-            map.height[pos_y as usize][pos_x as usize] -=erosion_factor;
+            terrain.height[pos_y as usize][pos_x as usize] -=erosion_factor;
 
             let surround = [(pos_x, pos_y-1), (pos_x,pos_y+1), (pos_x-1, pos_y),(pos_x+1,pos_y)];
             for (tx,ty) in surround.iter() {
-                match map.height_at(*tx, *ty){
+                match terrain.height_at(*tx, *ty){
                     Ok(v) => {
                         if (mini > v) {
                             mini = v;
