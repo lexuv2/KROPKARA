@@ -1,5 +1,6 @@
 use rand::prelude::*;
 #[path = "../map.rs"] mod map;
+use map::Map;
 
 
 pub fn basic_drop(map: &mut Map, drop_amnt: i32, drop_life: i32)
@@ -10,27 +11,25 @@ pub fn basic_drop(map: &mut Map, drop_amnt: i32, drop_life: i32)
     
 
     for iter in 0..drop_amnt{
-        let pos_x: i64 = rand::gen_range(0,w);
-        let pos_y: i64 = rand::gen_range(0,h);
+        let pos_x: i64 = rand::thread_rng().gen_range(0..(w as i64));
+        let pos_y: i64 = rand::thread_rng().gen_range(0..(h as i64));
         for l in 0..drop_life{
-            let mut min_x = f64::MAX;
-            let mut min_y = f64::MAX;
+            let mut min_x:i64 = 0;
+            let mut min_y:i64 = 0;
             let mut mini = f64::MAX;
 
 
-            let mut tx;
-            let mut ty;
+            let mut tx: i64;
+            let mut ty: i64;
 
-            tx = pos_x-1;
-            ty = pos_y-1;
             let surround = [(pos_x, pos_y-1), (pos_x,pos_y+1), (pos_x-1, pos_y),(pos_x+1,pos_y)];
             for (tx,ty) in surround.iter() {
-                match map.height_at(tx, ty){
+                match map.height_at(*tx, *ty){
                     Ok(v) => {
                         if (mini > v) {
                             mini = v;
-                            min_x = tx;
-                            min_y = ty;
+                            min_x = *tx;
+                            min_y = *ty;
                         }
                     }
                     Err(e) => {
@@ -46,10 +45,3 @@ pub fn basic_drop(map: &mut Map, drop_amnt: i32, drop_life: i32)
 }
 
 
-fn get(x: i64,y:i64,max_x: i64,max_y: i64, map: &Vec<Vec<f64>> ){
-    if (x<0){return i64::MAX;}
-    if (x>max_x){return i64::MAX;}
-    if (y<0){return i64::MAX;}
-    if (y>max_y){return i64::MAX;}
-    return map[y][x];
-}
