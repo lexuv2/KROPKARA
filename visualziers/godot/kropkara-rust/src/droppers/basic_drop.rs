@@ -3,7 +3,7 @@ use rand::prelude::*;
 use map::Map;
 
 
-pub fn basic_drop(map: &mut Map, drop_amnt: i32, drop_life: i32)
+pub fn basic_drop(map: &mut Map, drop_amnt: i64, drop_life: i64)
 {
     let (h, w) = map.dimensions();
     
@@ -11,8 +11,8 @@ pub fn basic_drop(map: &mut Map, drop_amnt: i32, drop_life: i32)
     
 
     for iter in 0..drop_amnt{
-        let pos_x: i64 = rand::thread_rng().gen_range(0..(w as i64));
-        let pos_y: i64 = rand::thread_rng().gen_range(0..(h as i64));
+        let mut pos_x: i64 = rand::thread_rng().gen_range(0..(w as i64));
+        let mut pos_y: i64 = rand::thread_rng().gen_range(0..(h as i64));
         for l in 0..drop_life{
             let mut min_x:i64 = 0;
             let mut min_y:i64 = 0;
@@ -21,6 +21,8 @@ pub fn basic_drop(map: &mut Map, drop_amnt: i32, drop_life: i32)
 
             let mut tx: i64;
             let mut ty: i64;
+
+            map.height[pos_y as usize][pos_x as usize] -=1.0;
 
             let surround = [(pos_x, pos_y-1), (pos_x,pos_y+1), (pos_x-1, pos_y),(pos_x+1,pos_y)];
             for (tx,ty) in surround.iter() {
@@ -37,6 +39,9 @@ pub fn basic_drop(map: &mut Map, drop_amnt: i32, drop_life: i32)
                     }
                 }
             }
+            
+            pos_x = min_x;
+            pos_y = min_y;
 
             
         }

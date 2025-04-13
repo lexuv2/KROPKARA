@@ -1,5 +1,6 @@
 use std::path;
 
+use basic_drop::basic_drop;
 use godot::meta::AsArg;
 use godot::meta::ParamType;
 use godot::prelude::*;
@@ -46,6 +47,14 @@ impl Caller {
         return  Caller::get_godot_vec_array_from_map(map);
     }
 
+    #[func]
+    fn godot_basic_drop(drop_amnt: i64,drop_life: i64)
+    {
+        let mut map: Map = Map::new_noise(512, 512, 1.0, 1);
+        basic_drop(&mut map, drop_amnt, drop_life);
+
+
+    }
 
     #[func]
     fn generate_image_from_array(arr:Array<PackedFloat64Array>)
