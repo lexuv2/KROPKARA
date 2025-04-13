@@ -1,4 +1,4 @@
-extends Node2D
+extends Control
 
 
 @onready var param_box = %param_box
@@ -15,7 +15,10 @@ var deagable_texture_scene = preload("res://dragable_texture.tscn")
 
 func _on_button_pressed() -> void:
 	var c = Caller.new()
-	c.godot_basic_drop(int(drops_box.value),int(life_box.value),erosion.value)
+	var call: Callable = c.godot_basic_drop.bind(int(drops_box.value),int(life_box.value),erosion.value)
+	call.call()
+	
+	
 	# print_debug(int(size_box.value))
 	# c.generate_image_from_array(heightmap)
 	
@@ -26,10 +29,11 @@ func _on_button_pressed() -> void:
 
 	var texture = ImageTexture.create_from_image(img)
 
-	var dragable_texture = deagable_texture_scene.instantiate()
-	dragable_texture.texture = texture
+	var dragable_texture: DragableTexture = deagable_texture_scene.instantiate()
+	#dragable_texture.texture = texture
+	
 
 	add_child(dragable_texture)
+	dragable_texture.set_texture(texture)
+	dragable_texture.set_description(str(call.get_bound_arguments()))
 	dragable_texture.global_position = get_viewport_rect().size / 2
-
-	pass # Replace with function body.

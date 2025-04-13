@@ -1,6 +1,32 @@
-[gd_scene load_steps=2 format=3 uid="uid://cxjr42t67ybo2"]
+[gd_scene load_steps=4 format=3 uid="uid://cxjr42t67ybo2"]
 
+[ext_resource type="Texture2D" uid="uid://cn07bqdqiycnh" path="res://icon.svg" id="1_pu50k"]
 [ext_resource type="Script" uid="uid://y7p7csmn25fh" path="res://dragable_texture.gd" id="1_vui8i"]
 
-[node name="DragableTexture" type="Sprite2D"]
+[sub_resource type="LabelSettings" id="LabelSettings_pu50k"]
+
+[node name="DragableTexture" type="Control"]
+layout_mode = 3
+anchors_preset = 0
 script = ExtResource("1_vui8i")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+offset_right = 133.0
+offset_bottom = 155.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="description" type="Label" parent="PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "HHHHHHHHHHH"
+label_settings = SubResource("LabelSettings_pu50k")
+
+[node name="main_map" type="TextureRect" parent="PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+texture = ExtResource("1_pu50k")
+stretch_mode = 4
