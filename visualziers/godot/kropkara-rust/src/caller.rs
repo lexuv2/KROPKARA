@@ -45,10 +45,12 @@ impl Caller {
     }
 
     #[func]
-    fn godot_basic_drop(drop_amnt: i64,drop_life: i64)
+    fn godot_basic_drop(drop_amnt: i64,drop_life: i64,erosion: f64)
     {
         let mut map: Map = Map::new_noise(512, 512, 1.0, 1);
-        basic_drop(&mut map, drop_amnt, drop_life);
+        basic_drop(&mut map, drop_amnt, drop_life,erosion);
+        array_to_image(map.height);
+
 
 
     }

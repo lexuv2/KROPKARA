@@ -33,6 +33,11 @@ impl Map{
         }
     }
 
+    pub fn normalize(map: &mut Vec<Vec<f64>>, min_val: f64, max_val: f64)
+    {
+
+    }
+
     pub fn height_at(&self, x: i64, y:i64) -> Result<f64, &str> {
         match self.height.get(x as usize) {
             Some(out) => {

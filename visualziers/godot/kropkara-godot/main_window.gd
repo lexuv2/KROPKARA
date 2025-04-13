@@ -6,16 +6,18 @@ extends Node2D
 var deagable_texture_scene = preload("res://dragable_texture.tscn")
 
 
-@onready var size_box: ParamBox = ParamBox.create(param_box,"Size", 256, 1, 4000)
-@onready var iters_box: ParamBox = ParamBox.create(param_box,"Iters", 1, 1, 4000)
-@onready var sp_box: ParamBox = ParamBox.create(param_box,"SP", 1, 1, 4000)
-
+# @onready var size_box: ParamBox = ParamBox.create(param_box,"Size", 256, 1, 4000)
+# @onready var iters_box: ParamBox = ParamBox.create(param_box,"Iters", 1, 1, 4000)
+# @onready var sp_box: ParamBox = ParamBox.create(param_box,"SP", 1, 1, 4000)
+@onready var drops_box: ParamBox = ParamBox.create(param_box,"drops", 1, 1, 400000)
+@onready var life_box: ParamBox = ParamBox.create(param_box,"life", 1, 1, 400000)
+@onready var erosion: ParamBox = ParamBox.create(param_box,"erosion", 0.01, 0, 100,0.01)
 
 func _on_button_pressed() -> void:
 	var c = Caller.new()
-	var heightmap = c.perlin(int(size_box.value),int(size_box.value),float(sp_box.value),int(iters_box.value));
-	print_debug(int(size_box.value))
-	c.generate_image_from_array(heightmap)
+	c.godot_basic_drop(int(drops_box.value),int(life_box.value),erosion.value)
+	# print_debug(int(size_box.value))
+	# c.generate_image_from_array(heightmap)
 	
 
 

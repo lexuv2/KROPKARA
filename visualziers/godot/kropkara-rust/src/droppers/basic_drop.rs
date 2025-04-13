@@ -2,7 +2,7 @@ use rand::prelude::*;
 use crate::map::*;
 
 
-pub fn basic_drop(map: &mut Map, drop_amnt: i64, drop_life: i64)
+pub fn basic_drop(map: &mut Map, drop_amnt: i64, drop_life: i64,erosion_factor: f64)
 {
     let (h, w) = map.dimensions();
     
@@ -21,7 +21,7 @@ pub fn basic_drop(map: &mut Map, drop_amnt: i64, drop_life: i64)
             let mut tx: i64;
             let mut ty: i64;
 
-            map.height[pos_y as usize][pos_x as usize] -=1.0;
+            map.height[pos_y as usize][pos_x as usize] -=erosion_factor;
 
             let surround = [(pos_x, pos_y-1), (pos_x,pos_y+1), (pos_x-1, pos_y),(pos_x+1,pos_y)];
             for (tx,ty) in surround.iter() {

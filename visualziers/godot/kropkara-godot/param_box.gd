@@ -11,7 +11,7 @@ var value: float = 0.0
 
 
 
-static func create(creator: Node,name: String, value: int, min =0 , max = 100) -> PanelContainer:
+static func create(creator: Node,name: String, value: int, min =0 , max = 100,step =1 ) -> PanelContainer:
     var scene = preload("res://param_box.tscn").instantiate()
     creator.add_child(scene)
     scene.name = name
@@ -19,6 +19,7 @@ static func create(creator: Node,name: String, value: int, min =0 , max = 100) -
     scene.spinbox.min_value = min
     scene.spinbox.max_value = max
     scene.spinbox.value = value
+    scene.spinbox.step = step
     
     scene.label.text = name
     return scene
