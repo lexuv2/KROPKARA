@@ -1,41 +1,43 @@
 use rand::prelude::*;
+#[path = "../map.rs"] mod map;
 
-pub fn basic_drop(map: Vec<Vec<f64>>, drop_amnt: i32, drop_life: i32)
+
+pub fn basic_drop(map: &mut Map, drop_amnt: i32, drop_life: i32)
 {
-    let h = map.len();
-    let w = map[0].len();
-
+    let (h, w) = map.dimensions();
     
-    let mut ret = map.clone();
+    let mut ret = map.height.clone();
     
 
     for iter in 0..drop_amnt{
         let pos_x: i64 = rand::gen_range(0,w);
         let pos_y: i64 = rand::gen_range(0,h);
-        for l in 0.drop_life{
-            let mut min_x = i64::MAX;
-            let mut min_y = i64::MAX;
-            let mut mini = i64::MAX;
+        for l in 0..drop_life{
+            let mut min_x = f64::MAX;
+            let mut min_y = f64::MAX;
+            let mut mini = f64::MAX;
 
 
             let mut tx;
             let mut ty;
 
             tx = pos_x-1;
-            ty - pos_y-1;
-            if (get(tx,ty,w,h,map) < mini ){min_x = tx;min_y=ty; mini = get(tx,ty,w,h,map);}
+            ty = pos_y-1;
+            let surround = [(pos_x, pos_y-1), (pos_x,pos_y+1), (pos_x-1, pos_y),(pos_x+1,pos_y)];
+            for (tx,ty) in surround.iter() {
+                match map.height_at(tx, ty){
+                    Ok(v) => {
+                        if (mini > v) {
+                            mini = v;
+                            min_x = tx;
+                            min_y = ty;
+                        }
+                    }
+                    Err(e) => {
 
-            tx = pos_x;
-            ty - pos_y-1;
-            if (get(tx,ty,w,h,map) < mini ){min_x = tx;min_y=ty; mini = get(tx,ty,w,h,map);}
-
-            tx = pos_x+1;
-            ty - pos_y-1;
-            if (get(tx,ty,w,h,map) < mini ){min_x = tx;min_y=ty; mini = get(tx,ty,w,h,map);}
-
-            tx = pos_x+1;
-            ty - pos_y+1;
-            if (get(tx,ty,w,h,map) < mini ){min_x = tx;min_y=ty; mini = get(tx,ty,w,h,map);}
+                    }
+                }
+            }
 
             
         }

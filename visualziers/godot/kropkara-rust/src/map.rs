@@ -15,7 +15,7 @@ pub struct Map {
 }
 
 impl Map{
-    fn new(x: i64, y:i64, sp: f64) -> Map {
+    pub fn new(x: i64, y:i64, sp: f64) -> Map {
         let mut m = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
         let mut s = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
         let mut a = vec![vec![0.0; (x+1) as usize] ; (y+1) as usize];
@@ -33,7 +33,7 @@ impl Map{
         }
     }
 
-    fn height_at(&self, x: i64, y:i64) -> Result<f64, &str> {
+    pub fn height_at(&self, x: i64, y:i64) -> Result<f64, &str> {
         match self.height.get(x as usize) {
             Some(out) => {
                 match out.get(y as usize) {
@@ -47,8 +47,12 @@ impl Map{
         }
     }
 
-    fn check_oob(&self, x: i64, y: i64) -> bool {
+    pub fn check_oob(&self, x: i64, y: i64) -> bool {
         (x >= 0) && (x < self.x_size) && (y >= 0) && (y < self.y_size)
+    }
+
+    pub fn dimensions(&self) -> (usize, usize) {
+        (self.height.len(), self.height[0].len())
     }
 
     /*

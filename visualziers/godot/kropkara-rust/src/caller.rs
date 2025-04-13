@@ -13,6 +13,7 @@ use image_generator::get_random_2d_noise;
 use map::Map;
 #[path = "map.rs"] mod map;
 #[path = "image_generator.rs"] mod image_generator;
+#[path = "droppers/basic_drop.rs"] mod basic_drop;
 
 #[derive(GodotClass)]
 #[class(base=Control)]
