@@ -9,11 +9,8 @@ use godot::classes::IControl;
 use godot::classes::Texture2D;
 use godot::classes::*;
 use godot::classes::Image;
-use image_generator::array_to_image;
-use image_generator::get_random_2d_noise;
-use map::Map;
-#[path = "map.rs"] mod map;
-#[path = "image_generator.rs"] mod image_generator;
+use crate::map::*;
+use crate::image_generator::*;
 #[path = "droppers/basic_drop.rs"] mod basic_drop;
 
 #[derive(GodotClass)]

@@ -1,6 +1,5 @@
 use rand::prelude::*;
-#[path = "../map.rs"] mod map;
-use map::Map;
+use crate::map::*;
 
 
 pub fn basic_drop(map: &mut Map, drop_amnt: i64, drop_life: i64)
