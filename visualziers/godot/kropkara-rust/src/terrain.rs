@@ -1,3 +1,5 @@
+use core::f64;
+
 use rand::prelude::*;
 use godot::prelude::*;
 #[path = "perlin.rs"] mod perlin;
@@ -33,10 +35,51 @@ impl Terrain{
         }
     }
 
-    pub fn normalize(terrain: &mut Vec<Vec<f64>>, min_val: f64, max_val: f64)
+    pub fn normalize_f64(mut terrain:  Vec<Vec<f64>>, min_val: f64, max_val: f64) ->  Vec<Vec<f64>>
     {
+        
+        let mut mini = f64::MAX;
+        let mut maxi = f64::MIN;
+        for x in terrain.iter(){
+            for y in x.iter()
+            {
+                if mini > *y{mini=*y;}
+                if maxi > *y{maxi=*y;}
+            }
+        }
+
+        for x in terrain.iter_mut(){
+            for y in x.iter_mut()
+            {
+                *y = ((*y-mini)/(maxi-mini) * (max_val-min_val))+min_val
+            }
+        }
+
+        return terrain;
+    }
+
+    pub fn normalize_i64(mut terrain:  Vec<Vec<f64>>, min_val: i64, max_val: i64) -> Vec<Vec<i64>>
+    {
+        
+        terrain = Self::normalize_f64(terrain, min_val as f64,max_val as f64);
+        let mut ret:  Vec<Vec<i64>> = vec![];
+        for x in terrain.iter_mut()
+        {
+            ret.push(vec![]);
+            for y in x.iter_mut()
+            {
+                ret.last_mut().unwrap().push(*y as i64);
+                
+            }
+        }
+   
+
+        return ret;
 
     }
+
+
+
 
     pub fn height_at(&self, x: i64, y:i64) -> Result<f64, &str> {
         match self.height.get(x as usize) {
