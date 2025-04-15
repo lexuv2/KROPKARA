@@ -12,6 +12,7 @@ use godot::classes::Image;
 use crate::terrain::*;
 use crate::image_generator::*;
 #[path = "droppers/basic_drop.rs"] mod basic_drop;
+#[path = "droppers/bfd_drop.rs"] mod bfd_drop;
 
 #[derive(GodotClass)]
 #[class(base=Control)]
