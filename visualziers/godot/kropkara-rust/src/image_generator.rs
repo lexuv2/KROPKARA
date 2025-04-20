@@ -5,7 +5,7 @@ use rand::prelude::*;
 
 use godot::prelude::*;
 
-pub fn array_to_image(arr: Vec<Vec<f64>>) -> RgbImage
+pub fn array_to_image(arr: &Vec<Vec<f64>>, image_name: &'static str) -> RgbImage
 {
     let h: usize = arr.len();
     let w: usize = arr[0].len();
@@ -47,14 +47,11 @@ pub fn array_to_image(arr: Vec<Vec<f64>>) -> RgbImage
 
 
     let buf_len = buf.len();
-    godot_print!("{buf_len}");
-    godot_print!("{h}");
-    godot_print!("{w}");
     let img_buf = RgbImage::from_raw(w as u32, h as u32, buf);
 
 
     let img = img_buf.expect("{img_buf.Err}");
-    img.save("TEST.png").unwrap();
+    img.save(format!("{image_name}.png")).unwrap();
     return  img;
 }
 

@@ -12,8 +12,8 @@ pub struct Terrain {
     dropterrain: Vec<Vec<f64>>,
     speedterrain: Vec<Vec<f64>>,
     speed_preservation: f64,
-    x_size: i64,
-    y_size: i64,
+    pub  x_size: i64,
+    pub y_size: i64,
 }
 
 impl Terrain{
@@ -94,6 +94,22 @@ impl Terrain{
             None => {Err("OOB")}
         }
     }
+
+    pub fn height_at_mut(&mut self, x: i64, y:i64) -> Result<&mut f64, &str> {
+        match self.height.get_mut(x as usize) {
+            Some(out) => {
+                match out.get_mut(y as usize) {
+                    Some(v) => {
+                        Ok(v)
+                    }
+                    None => {Err("OOB")}
+                }
+            }
+            None => {Err("OOB")}
+        }
+    }
+
+
 
     pub fn check_oob(&self, x: i64, y: i64) -> bool {
         (x >= 0) && (x < self.x_size) && (y >= 0) && (y < self.y_size)

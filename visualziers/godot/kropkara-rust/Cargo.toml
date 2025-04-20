@@ -10,6 +10,10 @@ image = "0.25.6"
 
 
 
+[[bin]]
+name = "kropkara-rust"
+path = "src/main.rs"
+
 [lib]
 crate-type = ["cdylib"]
 image = "0.25.6"

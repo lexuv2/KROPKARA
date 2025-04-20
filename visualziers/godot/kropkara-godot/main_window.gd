@@ -14,23 +14,22 @@ var deagable_texture_scene = preload("res://dragable_texture.tscn")
 @onready var erosion: ParamBox = ParamBox.create(param_box,"erosion", 0.01, 0, 100,0.01)
 
 func _on_button_pressed() -> void:
+	print_debug("A")
 	var c = Caller.new()
-	var call: Callable = c.godot_basic_drop.bind(int(drops_box.value),int(life_box.value),erosion.value)
-	call.call()
-	
-	
+	# var call: Callable = c.godot_basic_drop.bind(int(drops_box.value),int(life_box.value),erosion.value)
+	# call.call()
+	print_debug("H")
+	c.godot_bfd_step(2)
+	print_debug("H2")
 	# print_debug(int(size_box.value))
 	# c.generate_image_from_array(heightmap)
 	
 
 
 	var img = Image.load_from_file("TEST.png")
-	
-
 	var texture = ImageTexture.create_from_image(img)
-
 	var dragable_texture: DragableTexture = deagable_texture_scene.instantiate()
-	#dragable_texture.texture = texture
+
 	
 
 	add_child(dragable_texture)
